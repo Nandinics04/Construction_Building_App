@@ -1,56 +1,200 @@
-# Welcome to your Expo app 👋
+# ConneX
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+ConneX is a construction companion app for planning a build in India: site location, nearby planners and suppliers, interior lookbooks, cost estimates, budget vs spend, and site progress with photos.
 
-## Get started
+It runs on **Expo SDK 57**, **React Native 0.86**, and **React 19**, with **Clerk** for sign-in and **Firebase** for project data, images, and PDF catalogs.
 
-1. Install dependencies
+## Features
 
-   ```bash
-   npm install
-   ```
+| Area | What it does |
+| --- | --- |
+| **Account** | Email/password and Google sign-in (Clerk). Profile sheet shows name, email, and photo. |
+| **Language** | English, Hindi, Telugu, Tamil, Kannada, Marathi. Choice is saved on the device. |
+| **Plans** | Search or GPS a site, then list nearby contractors and agencies within 5 km. |
+| **Interior design** | Style → room → category photo galleries from Firebase Storage. |
+| **Cost estimation** | 2026 India turnkey ₹/sq ft by city, finish, and construction type, plus a rupee split. |
+| **Budget tracking** | Projects with a planned cap and logged material/labour costs. |
+| **Progress tracking** | Same projects, with tasks, stages, check-off, share, cover photo, and task photos. |
+| **Material catalog** | In-app PDF reader for elevation, electrical, plumbing, doors, colours, roof, floor, safety. |
+| **Cost catalog** | Nearby material stores by location and item (cement, steel, sand, and more). |
 
-2. Start the app
+Budget tracking and progress tracking share the Firestore `projects` collection.
 
-   ```bash
-   npx expo start
-   ```
+## Stack
 
-In the output, you'll find options to open the app in a
+- Expo Router (`src/app`)
+- Clerk (`@clerk/expo`) — not Firebase Auth
+- Cloud Firestore + Firebase Storage
+- Google Places / Geolocation for maps and nearby search
+- Expo File System for JPEG uploads to Storage
+- ConneX palette in `src/constants/theme.ts`
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Project layout
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+src/app/(app)/     Signed-in screens (home, plans, budget, progress, catalogs, …)
+src/app/screens/   Sign in, sign up, forgot password
+src/lib/           Firebase, cost formula, budget/progress helpers, image upload
+src/i18n/          Translations and language provider
+src/components/    Shared header, maps, PDF frame, places search
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Prerequisites
 
-### Other setup steps
+- Node.js 20+
+- npm
+- [Expo Go](https://expo.dev/go) **SDK 57** on a phone, or an Android/iOS simulator
+- Accounts: [Clerk](https://clerk.com), [Firebase](https://console.firebase.google.com), [Google Cloud](https://console.cloud.google.com) (Maps / Places)
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## Setup
 
-## Learn more
+1. Clone the repo and install:
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+npm install
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+2. Copy env and fill in keys (never commit `.env`):
 
-## Join the community
+```bash
+cp .env.example .env
+```
 
-Join our community of developers creating universal apps.
+| Variable | Used for |
+| --- | --- |
+| `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` | Sign-in |
+| `EXPO_PUBLIC_FIREBASE_*` | Firestore + Storage |
+| `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` | Places, nearby search, photos |
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+3. Start Metro:
+
+```bash
+npx expo start
+```
+
+On Windows, if the phone cannot reach the PC, use a tunnel:
+
+```bash
+npm run start:tunnel
+```
+
+Then scan the QR code in Expo Go, or open the printed `exp://…trycloudflare.com:443` URL.
+
+Other scripts: `npm run start` (LAN), `npm run start:usb`, `npm run android`, `npm run ios`, `npm run web`.
+
+## Firebase
+
+Auth in the app is **Clerk**. Firebase Auth is unused. Test rules must allow access without a Firebase user.
+
+### Cloud Firestore
+
+1. Firebase Console → **Build → Firestore Database → Create database**.
+2. Start in **test mode**. A location such as `asia-south1` (Mumbai) is a good fit for India.
+3. Collection: **`projects`**.
+
+Typical document:
+
+```
+name, userEmail, userId, createdAt, budget, materials[], tasks[], progress, imageUrl
+```
+
+- `materials[]` — budget line items (`id`, `description`, `cost`, `category`, `createdAt`)
+- `tasks[]` — progress items (`id`, `description`, `date`, `isCompleted`, optional `notes`, `imageUrl`)
+
+Example rules while developing (tighten before production):
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+```
+
+### Storage
+
+1. Firebase Console → **Storage → Get started**.
+2. Bucket in `.env` should look like `your-project.firebasestorage.app` (no `gs://`).
+
+Paths the app uses:
+
+| Path | Content |
+| --- | --- |
+| `categories/{style}/{room}/{category}/…` | Interior photos |
+| `catalogs/*.pdf` | Material catalog PDFs (see list below) |
+| `projects/{projectId}/cover.jpg` | Progress cover |
+| `projects/{projectId}/tasks/{taskId}.jpg` | Task photo |
+
+Catalog file names:
+
+`elevation.pdf`, `electrical.pdf`, `plumbing.pdf`, `door.pdf`, `colors.pdf`, `roof.pdf`, `floor.pdf`, `safety.pdf`
+
+Test Storage rules:
+
+```
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if true;
+    }
+  }
+}
+```
+
+Spark plan Storage may need Blaze depending on Google’s current quotas.
+
+## Clerk
+
+Enable **email/password** and **Google** in the Clerk dashboard. Set the publishable key in `.env`. Redirect after sign-in goes to `/(app)/home`.
+
+## Google Maps / Places
+
+Enable **Places API** (and related Maps APIs you use) for the same key as `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`. Restrict the key when you ship.
+
+In **Expo Go**, native Google Maps chrome is not used. The plans map draws **OpenStreetMap / Carto / Esri tiles**. Nearby search still uses Google Places.
+
+## Cost estimation
+
+Rates in `src/lib/cost-estimate.ts` are **indicative 2026 India turnkey ₹/sq ft** (city × finish × construction type × built-up area + 5% contingency).
+
+- Types: load-bearing, RCC frame, prefab / LGSF, industrial / PEB
+- Excludes land, GST, statutory fees, and contractor quotes
+
+Use the figure as a planning cap in Budget tracking if you want.
+
+## Languages
+
+Open Home → profile (name + photo) → **Language**. Stored with Expo Secure Store (native) or `localStorage` (web).
+
+UI chrome is translated. User-entered names, saved task text, and city names stay as stored.
+
+## Notes
+
+- Reload Expo Go fully after native-related changes (not only Fast Refresh).
+- Firestore writes strip `undefined` fields; the JS SDK rejects them.
+- Progress photos upload via Expo File System HTTP, not the Firebase web Blob helper (that path fails in React Native).
+- Do not commit `.env`, credentials, or `node_modules`.
+
+## What not to push
+
+Git ignores local and secret files via `.gitignore`. Do **not** add these to GitHub:
+
+| Path | Why |
+| --- | --- |
+| `.env` | Clerk, Firebase, and Maps keys |
+| `node_modules/` | Installed packages (`npm install` recreates this) |
+| `.expo/` | Metro cache and local Expo state |
+| `ios/`, `android/` | Generated native folders (if you run prebuild) |
+| `*.jks`, `*.p8`, `*.p12`, `*.key` | Signing secrets |
+| `.vscode/`, `.idea/`, `.claude/`, `.cursor/` | Editor / AI tool settings |
+| `*.log` | Dev server logs |
+
+**Do** commit `.env.example` (empty key names only), source under `src/`, `assets/`, `package.json`, `app.json`, `app.config.js`, `metro.config.js`, and `scripts/`.
+
+## License
+
+Private project. All rights reserved unless you add a license.

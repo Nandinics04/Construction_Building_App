@@ -1,43 +1,53 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+# Learn more: https://docs.github.com/en/get-started/git-basics/ignoring-files
 
-# dependencies
+# Dependencies (reinstall with npm install)
 node_modules/
 
-# Expo
+# Expo / Metro local cache and generated types
 .expo/
 dist/
 web-build/
+.turbo/
 expo-env.d.ts
+.metro-health-check*
 
-# Native
+# Secrets — keep .env.example in git, never the real keys
+.env
+.env.*
+!.env.example
+
+# Native prebuild output (Expo Go does not need these)
+/ios
+/android
 .kotlin/
+
+# Keystores and signing material
 *.orig.*
 *.jks
 *.p8
 *.p12
 *.key
 *.mobileprovision
+*.pem
 
-# Metro
-.metro-health-check*
-
-# debug
+# Logs and debug dumps
+*.log
 npm-debug.*
 yarn-debug.*
 yarn-error.*
 
-# macOS
+# OS / editor clutter
 .DS_Store
-*.pem
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+.claude/
+.cursor/
 
-# local env files
-.env*.local
-
-# typescript
+# TypeScript
 *.tsbuildinfo
 
+# Misc
 example
-
-# generated native folders
-/ios
-/android
+coverage/

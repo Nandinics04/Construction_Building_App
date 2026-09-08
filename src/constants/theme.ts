@@ -61,5 +61,17 @@ export const Spacing = {
   six: 64,
 } as const;
 
+/** ConneX product colors — warm construction / studio palette. */
+export const Connex = {
+  bg: '#F4F1EA',
+  surface: '#FFFFFF',
+  ink: '#1C1917',
+  muted: '#6B6560',
+  line: '#E6E0D6',
+  accent: '#C45C26',
+  accentSoft: '#F4E4D6',
+  danger: '#B42318',
+} as const;
+
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;
