@@ -6,6 +6,7 @@
     "@clerk/expo": "^4.6.5",
     "@expo/ui": "~57.0.16",
     "@expo/vector-icons": "^15.0.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/datetimepicker": "9.1.0",
     "expo": "~57.0.20",
     "expo-auth-session": "~57.0.11",
@@ -30,6 +31,7 @@
     "expo-system-ui": "~57.0.3",
     "expo-web-browser": "~57.0.2",
     "firebase": "^12.18.0",
+    "idb": "^8.0.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.86.3",
@@ -57,7 +59,10 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "eas-build-pre-install": "npm install -g npm@11.17.0",
+    "build:android": "eas build -p android --profile preview",
+    "build:android:production": "eas build -p android --profile production"
   },
   "private": true
 }

@@ -29,6 +29,7 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 *.pem
+credentials.json
 
 # Logs and debug dumps
 *.log

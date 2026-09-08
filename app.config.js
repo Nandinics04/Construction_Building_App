@@ -6,6 +6,15 @@ module.exports = () => {
 
   return {
     ...app,
+    owner: app.owner ?? 'nandini_expo',
+    extra: {
+      ...(app.extra ?? {}),
+      eas: {
+        ...(app.extra?.eas ?? {}),
+        projectId:
+          app.extra?.eas?.projectId ?? 'ad8dd371-2692-4b0c-8c4f-25d327b6a276',
+      },
+    },
     ios: {
       ...app.ios,
       config: {

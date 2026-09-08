@@ -82,6 +82,56 @@ Then scan the QR code in Expo Go, or open the printed `exp://…trycloudflare.co
 
 Other scripts: `npm run start` (LAN), `npm run start:usb`, `npm run android`, `npm run ios`, `npm run web`.
 
+## Android (EAS)
+
+This is how you get a real ConneX APK on a phone (no Expo Go). Builds run on Expo’s servers. You need a free [expo.dev](https://expo.dev) account.
+
+`.env` is gitignored, so EAS cannot see your local keys. Put the same `EXPO_PUBLIC_*` names on Expo for the **preview** environment before you build.
+
+1. Install EAS CLI and log in (browser window will open):
+
+```bash
+npm install --global eas-cli
+eas login
+eas whoami
+```
+
+2. Link this folder to an Expo project (creates `extra.eas.projectId` in `app.json`):
+
+```bash
+eas build:configure
+```
+
+Choose **Android**. Let EAS generate a new keystore when asked.
+
+3. Copy every variable from `.env.example` into Expo:
+
+[expo.dev](https://expo.dev) → your project → **Environment variables** → environment **preview** (and later **production**).
+
+Visibility: **Sensitive** for keys. Do not use **Secret** for `EXPO_PUBLIC_*` — those values are baked into the app and Secret vars are not available to the JS bundle.
+
+Or from the project folder (repeat per name, use your real values):
+
+```bash
+eas env:create --name EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY --value YOUR_VALUE --environment preview --visibility sensitive
+```
+
+4. Start the Android APK build:
+
+```bash
+npm run build:android
+```
+
+That runs `eas build -p android --profile preview`. First Android build can take 15–25 minutes. When it finishes, open the build URL, tap **Install**, and download the APK on the Samsung. Allow install from the browser if Android asks.
+
+5. Later, Play Store uses an AAB (not APK):
+
+```bash
+npm run build:android:production
+```
+
+You need a Google Play Console account to upload that file.
+
 ## Firebase
 
 Auth in the app is **Clerk**. Firebase Auth is unused. Test rules must allow access without a Firebase user.
