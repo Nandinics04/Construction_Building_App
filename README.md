@@ -4,6 +4,10 @@ ConneX is a construction companion app for planning a build in India: site locat
 
 It runs on **Expo SDK 57**, **React Native 0.86**, and **React 19**, with **Clerk** for sign-in and **Firebase** for project data, images, and PDF catalogs.
 
+## Demo
+
+[2-minute walkthrough (Google Drive)](https://drive.google.com/file/d/1_EMxIlyuVWdgk51irQmeM4y6IXoPI4q8/view?usp=sharing)
+
 ## Features
 
 | Area | What it does |
